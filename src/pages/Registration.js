@@ -2,7 +2,21 @@ import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
+import { useContext } from "react";
+import { UserAuthContext } from "../Context/AuthContext";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
+
 const Registration = () => {
+
+    const navigate = useNavigate()
+
+
+    const {createUser} = useContext(UserAuthContext)
+
+
+
     const [showPass, setShowPass] = useState('password')
     const hadnleShowPassword = () => {
         if (showPass === 'password') {
@@ -39,13 +53,27 @@ const Registration = () => {
         }
         if (!password) {
             setErrorPassword('password de');
-        } else {
-            if (!/^(?=.*[a-z])/.test(password)) {
-                setErrorPassword('please lowercase')
-            }
-            else if (!/^(?=.*[A-Z])/.test(password)) {
-                setErrorPassword('please uppercase')
-            }
+        } 
+
+        else{
+            createUser(email, password)
+            .then((userCredential) => {
+                // Signed in 
+                toast.success('Registraion Complate')
+                const user = userCredential.user;
+                console.log(user);
+                setTimeout(()=>{
+                    navigate('/login')
+                },2000)
+                // ...
+              })
+              .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                console.log(errorMessage);
+                // ..
+              });
+
         }
     }
 
@@ -53,6 +81,7 @@ const Registration = () => {
 
     return (
         <div className="container-fluid">
+            <ToastContainer></ToastContainer>
 
             <div className="row">
                 <div className="col-lg-4 offset-lg-4 mt-5 mb-5">
@@ -86,9 +115,6 @@ const Registration = () => {
                                 <p className='text-danger'>{errorPassword}</p>
                             </Form.Group>
 
-                            <Form.Group className="mb-3" controlId="formBasicCheckbox">
-                                <Form.Check type="checkbox" label="Check me out" />
-                            </Form.Group>
 
                             <Button variant="primary" className='w-100' type="submit">
                                 Submit
